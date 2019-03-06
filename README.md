@@ -1,1 +1,1 @@
-# yomiyama-training-for-R
+# このgitは自分の学習したRコードをオンラインで確認できることを目的としたgitです
