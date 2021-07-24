@@ -1,3 +1,5 @@
+//(Fuji Is Just) ImageJ 2.1.0;Java 1.8.0_172[64bit]
+
 /*
  * Macro template to process multiple images in a folder
  */
