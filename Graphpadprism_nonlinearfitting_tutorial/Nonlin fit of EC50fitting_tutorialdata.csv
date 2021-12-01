@@ -1,0 +1,32 @@
+,No inhibitor,Inhibitor 
+[Agonist] vs. response -- Variable slope (four parameters) ,,
+Best-fit values,,
+     Bottom,-8.149,4.786
+     Hillslope,0.8944,0.902
+     Top,370.6,347.8
+     EC50,6.796e-008,9.479e-007
+     logEC50,-7.168,-6.023
+     Span,378.7,343
+Std. Error,,
+     Bottom,16.41,12.78
+     Hillslope,0.1281,0.138
+     Top,10.92,11.83
+     EC50,1.291e-008,1.799e-007
+     Span,21.14,19.4
+95% CI (profile likelihood),,
+     Bottom,-41.99 to 23.86,-23.47 to 29.7
+     Hillslope,0.6644 to 1.202,0.6409 to 1.328
+     Top,348.9 to 396,323.9 to 378.7
+     EC50,4.617e-008 to 1.017e-007,6.445e-007 to 1.432e-006
+     logEC50,-7.336 to -6.993,-6.191 to -5.844
+Goodness of Fit,,
+     Degrees of Freedom,23,25
+     R square,0.965,0.9665
+     Absolute Sum of Squares,18757,18003
+     Sy.x,28.56,26.84
+Constraints,,
+     EC50,EC50 > 0,EC50 > 0
+,,
+Number of points,,
+     # of X values,33,33
+     # Y values analyzed,27,29
