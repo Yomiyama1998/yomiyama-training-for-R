@@ -1,0 +1,510 @@
+---
+title: "非線形回帰最小二乗法"
+author: "yomiyama"
+date: "2022/2/5"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(drc)
+library(plotly)
+library(rgl)
+library(minpack.lm)
+```
+
+## required packages
+
+```{r eval=FALSE}
+library(tidyverse)
+library(drc)
+library(plotly)
+library(rgl)
+library(minpack.lm)
+```
+
+
+```{r}
+dat<-read.csv("D:/VBA/Nov_25th_EC50_training.csv",header=TRUE)
+dat<-dat[,-1]
+
+resp_a1<-dat %>% dplyr::select(,starts_with("No.inhibitor"))
+colnames(resp_a1)<-NULL
+resp_a2<-c()
+for(i in 1:nrow(resp_a1)){
+  tmp<-c(resp_a1[,i])
+  resp_a2<-append(resp_a2,tmp)
+}
+ConcA<-NA
+
+ConcA<-rep(dat$conc,times=3)
+dat_a<-data.frame(ConcA,resp_a2)
+
+resp_b1<-dat %>% dplyr::select(,starts_with("Inhibitor"))
+colnames(resp_b1)<-NULL
+resp_b2<-c()
+for(i in 1:nrow(resp_b1)){
+  tmp<-c(resp_b1[,i])
+  resp_b2<-append(resp_b2,tmp)
+}
+
+ConcB<-rep(dat$conc,times=3)
+dat_b<-data.frame(ConcB,resp_b2)
+
+colnames(dat_a)<-c("Conc","Response")
+colnames(dat_b)<-c("Conc","Response")
+
+na<-nrow(dat_a)
+
+groupA<-rep(c("No_inhibitor"),na)
+
+dat_a<-cbind(dat_a,groupA)
+
+nb<-nrow(dat_b)
+
+groupB<-rep(c("Inhibitor"),nb)
+
+dat_b<-cbind(dat_b,groupB)
+
+
+colnames(dat_a)<-c("Conc","Response","Group")
+colnames(dat_b)<-c("Conc","Response","Group")
+
+dat_all<-rbind(dat_a,dat_b)
+dat_all$Group <- factor(dat_all$Group, levels=unique(dat_all$Group))
+
+Group_2<-c(rep(c(1,0),each=nrow(dat_a)))
+
+dat_all<-data.frame(dat_all,Group_2)
+
+
+dat_all2<-na.omit(dat_all)
+
+```
+
+
+# 取り敢えず図示
+
+```{r,echo=TRUE}
+
+
+llf2_3<-function(hill,EC50){
+  sum((y-100/(1+10^(hill%*%(EC50-x))))^2)
+  
+}
+
+
+dat_a2<-na.omit(dat_a)
+x<-dat_a2$Conc
+y<-dat_a2$Response
+
+
+
+hill_p<-seq(-2,2,2.0)
+EC50_p<-seq(-8,-4,2.0)
+
+
+m<-matrix(0,length(hill_p),length(EC50_p))
+
+for (i in 1:length(hill_p)) {
+ for (j in 1:length(EC50_p)) {
+  m[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+
+
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m) %>% add_surface()
+
+
+hill_p<-seq(-2,2,0.5)
+EC50_p<-seq(-9,-5,0.5)
+
+m2<-matrix(0,length(hill_p),length(EC50_p))
+
+
+for (i in 1:length(hill_p)) {
+  
+ for (j in 1:length(EC50_p)) {
+  m2[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m2) %>% add_surface()
+
+hill_p<-seq(0,1,0.01)
+EC50_p<-seq(-7.5,-6.5,0.01)
+
+
+m3<-matrix(0,length(hill_p),length(EC50_p))
+
+for (i in 1:length(hill_p)) {
+  
+ for (j in 1:length(EC50_p)) {
+  m3[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m3) %>% add_surface()
+
+
+
+dat_b2<-na.omit(dat_b)
+
+x<-dat_b2$Conc
+y<-dat_b2$Response
+
+
+
+hill_p<-seq(-1,5,2.0)
+EC50_p<-seq(-8,-4,2.0)
+
+
+
+m<-matrix(0,length(hill_p),length(EC50_p))
+
+for (i in 1:length(hill_p)) {
+ for (j in 1:length(EC50_p)) {
+  m[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+
+
+plotly::plot_ly(z=m) %>% add_surface(x=EC50_p,y=hill_p,z=m)
+
+
+hill_p<-seq(-1,3,0.5)
+EC50_p<-seq(-9,-5,0.5)
+
+m2<-matrix(0,length(hill_p),length(EC50_p))
+
+
+for (i in 1:length(hill_p)) {
+  
+ for (j in 1:length(EC50_p)) {
+  m2[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m2) %>% add_surface()
+
+hill_p<-seq(0,1,0.01)
+EC50_p<-seq(-6.5,-5.5,0.01)
+
+
+m3<-matrix(0,length(hill_p),length(EC50_p))
+
+for (i in 1:length(hill_p)) {
+  
+ for (j in 1:length(EC50_p)) {
+  m3[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m3) %>% add_surface()
+
+```
+
+
+
+
+# Levenberg-Marquardt法
+
+
+```{r}
+
+conc<-dat_all2$Conc
+Obs<-dat_all2$Response
+Group<-as.integer(dat_all2$Group)-1
+Group2<-as.integer(dat_all2$Group_2)
+
+
+pred<-function(parS,xx,group,group2){
+  100/(1+10^(parS$b*(parS$c*group-xx+parS$t*group2)))
+}
+
+resid<-function(p,observed,xx,group,group2){
+  observed-pred(p,xx,group,group2)
+}
+
+parStart<-list(b=0.1,t=1,c=1)
+
+nls.out<- nls.lm(par=parStart, fn=resid, observed=Obs,xx=conc,group=Group2,group2=Group,control=nls.lm.control(maxiter=1024,nprint=1))
+
+```
+
+
+```{r}
+
+
+residA<-function(Obs,c,hill,t,x,group,group2){
+  f<-sum((Obs-100/(1+10^(hill*(c*group-x+t*group2))))^2)
+  return(f)
+}
+
+v.hill<-seq(0,2,by=0.001)
+
+ll.A<-NULL
+
+for (hill in v.hill) {
+  nlm1.A <- residA(Obs,nls.out$par$c,hill,nls.out$par$t,conc,Group2,Group)
+  ll.A<-c(ll.A,nlm1.A)
+}
+
+df.A <- data.frame(A=v.hill, ll=ll.A)
+
+ggplot(data=df.A) + geom_line(aes(A,ll), color="blue", size=1) + geom_vline(xintercept=nls.out$par$b, color="red", linetype = "longdash") + 
+  scale_x_continuous(breaks = c(seq(85,110,by=5),round(nls.out$par$b,4)),"Hill")
+
+
+
+v.ec50_Cont<-seq(-10,-4,by=0.001)
+
+ll.B<-NULL
+
+for (ec50 in v.ec50_Cont) {
+  nlm1.B <- residA(Obs,ec50,nls.out$par$b,nls.out$par$t,conc,Group2,Group)
+  ll.B<-c(ll.B,nlm1.B)
+}
+
+df.B <- data.frame(B=v.ec50_Cont, ll=ll.B)
+ggplot(data=df.B) + geom_line(aes(B,ll), color="blue", size=1) + 
+  geom_vline(xintercept=nls.out[[1]]$c, color="red", linetype = "longdash") + 
+  scale_x_continuous(breaks = c(seq(85,110,by=5),round(nls.out[[1]]$c,4)),"Cont")
+
+
+v.ec50_Treat<-seq(-10,-4,by=0.001)
+
+ll.C<-NULL
+
+for (ec50 in v.ec50_Treat) {
+  nlm1.C <- residA(Obs,nls.out$par$c,nls.out$par$b,ec50,conc,Group2,Group)
+  ll.C<-c(ll.C,nlm1.C)
+}
+
+df.C <- data.frame(C=v.ec50_Treat, ll=ll.C)
+ggplot(data=df.C) + geom_line(aes(C,ll), color="blue", size=1) + 
+  geom_vline(xintercept=nls.out[[1]]$t, color="red", linetype = "longdash") + 
+  scale_x_continuous(breaks = c(seq(85,110,by=5),round(nls.out[[1]]$t,4)),"Treat")
+
+
+
+
+```
+
+
+```{R}
+
+r.out<-nls.out$deviance
+c<-nls.out$par$c
+b<-nls.out$par$b
+t<-nls.out$par$t
+
+n_all2<-nrow(dat_all2)
+
+df<-n_all2-3
+
+qlevel<-qf(0.95,1,df)
+
+
+
+residB<-function(cont,qlevel){
+  f<-sum((Obs-100/(1+10^(b*(cont*Group2-conc+t*Group))))^2)
+  f2<-f-r.out-qlevel*r.out/df
+  return(f2)
+}
+
+
+Cont_lower<-uniroot(residB,interval = c(-10,nls.out$par$c),qlevel)$root
+Cont_upper<-uniroot(residB,interval = c(nls.out$par$c,-4),qlevel)$root
+
+
+
+residC<-function(treat,qlevel){
+  f<-sum((Obs-100/(1+10^(b*(c*Group2-conc+treat*Group))))^2)
+  f2<-f-r.out-qlevel*r.out/df
+  return(f2)
+}
+
+
+
+Treat_lower<-uniroot(residC,interval = c(-10,nls.out$par$t),qlevel)$root
+Treat_upper<-uniroot(residC,interval = c(nls.out$par$t,-4),qlevel)$root
+
+
+residD<-function(hill,qlevel){
+  f<-sum((Obs-100/(1+10^(hill*(c*Group2-conc+t*Group))))^2)
+  f2<-f-r.out-qlevel*r.out/df
+  return(f2)
+}
+
+
+hill_lower<-uniroot(residD,interval = c(0,nls.out$par$b),qlevel)$root
+hill_upper<-uniroot(residD,interval = c(nls.out$par$b,2),qlevel)$root
+
+
+EC50_Cont_est<-nls.out$par$c
+EC50_Treat_est<-nls.out$par$t
+hill_est<-nls.out$par$b
+
+EC50_est<-matrix(NA,nrow=3,ncol=2)
+Hill_est<-matrix(NA,nrow=3,ncol=2)
+
+EC50_est[1,]<-c(Cont_upper,Treat_upper)
+EC50_est[2,]<-c(EC50_Cont_est,EC50_Treat_est)
+EC50_est[3,]<-c(Cont_lower,Treat_lower)
+
+
+Hill_est[1,]<-c(hill_lower,hill_lower)
+Hill_est[2,]<-c(hill_est,hill_est)
+Hill_est[3,]<-c(hill_upper,hill_upper)
+
+rownames(EC50_est)<-c("EC50_upper","EC50","EC50_lower")
+colnames(EC50_est)<-c("Cont","Treat")
+
+rownames(Hill_est)<-c("Hill_upper","Hill","Hill_lower")
+colnames(Hill_est)<-c("Cont","Treat")
+
+EC50_est
+Hill_est
+
+```
+
+
+
+## 近似尤度
+
+```{r}
+
+nls.out2<-summary(nls.out)[[8]]
+SE<-nls.out2[,2]
+
+Upper<-nls.out2[,1]+SE*qt(0.975,df)
+Lower<-nls.out2[,1]-SE*qt(0.975,df)
+
+
+Est_1<-matrix(NA,nrow=3,ncol=3)
+
+Est_1[1,]<-Upper
+Est_1[2,]<-nls.out2[,1]
+Est_1[3,]<-Lower
+
+rownames(Est_1)<-c("Upper","Est","Lower")
+colnames(Est_1)<-c("Hill","Treat","Cont")
+
+Est_1
+
+
+names(SE)<-c("Hill","Treat","Cont")
+SE
+
+```
+
+```{r}
+hx2<-deriv(y~100/(1+10^(hill*(Cont*group2-x+(group1)*Treat))),c("hill","Cont","Treat"),function(x,y,group2,group1,hill,Cont,Treat){}
+      )
+
+conc<-dat_all2$Conc
+Obs<-dat_all2$Response
+Group<-as.integer(dat_all2$Group)-1
+Group2<-as.integer(dat_all2$Group_2)
+
+
+fr2<-hx2(conc,Obs,Group2,Group,nls.out$par$b,nls.out$par$c,nls.out$par$t)
+G<-attr(fr2,"gradient")
+
+V.lin<-nls.out$deviance/(nrow(dat_all2)-length(nls.out$par))*solve(t(G)%*%G)
+
+
+se.lin<-sqrt(diag(V.lin))
+
+```
+
+
+
+## ヒル係数も各群で別としたとき
+
+```{r}
+
+conc<-dat_all2$Conc
+Obs<-dat_all2$Response
+Group<-as.integer(dat_all2$Group)-1
+Group2<-as.integer(dat_all2$Group_2)
+
+
+pred<-function(parS,xx,group,group2){
+  100/(1+10^(parS$b*(parS$c*group-xx+parS$t*group2)))
+}
+
+resid<-function(p,observed,xx,group,group2){
+  observed-pred(p,xx,group,group2)
+}
+
+parStart<-list(b=0.1,t=1,c=1)
+
+nls.out<- nls.lm(par=parStart, fn=resid, observed=Obs,xx=conc,group=Group2,group2=Group,control=nls.lm.control(maxiter=1024,nprint=1))
+
+
+dat_a2
+ConcA_each<-dat_a2$Conc
+ObsA_each<-dat_a2$Response
+
+pred_Each<-function(par,x){
+  f<-100/(1+10^(par$hill*(par$EC50-x)))
+  return(f)
+}
+
+resid_Each<-function(p,observed_each,x){
+  observed_each-pred_Each(p,x)
+}
+
+parStart_each<-list(hill=0.1,EC50=1)
+
+nls.out_A<- nls.lm(par = parStart_each , fn=resid_Each,
+                   observed_each=ObsA_each,x=ConcA_each,control=nls.lm.control(maxiter=1024,nprint=1))
+
+summary(nls.out_A)
+
+dat_b2
+ConcB_each<-dat_b2$Conc
+ObsB_each<-dat_b2$Response
+
+nls.out_B<- nls.lm(par = parStart_each , fn=resid_Each, observed_each=ObsB_each,x=ConcB_each,control=nls.lm.control(maxiter=1024,nprint=1))
+
+summary(nls.out_B)
+
+
+```
+
+
+
+
+
+
+```{r}
+
+
+n_a<-nrow(dat_a2)
+n_b<-nrow(dat_b2)
+
+SE_t<-as.numeric(SE[2])
+SE_c<-as.numeric(SE[3])
+
+t_stat<-(nls.out2[2,1]-nls.out2[3,1])/(sqrt(SE_t/n_b+SE_c/n_a))
+
+free<-(SE_t/n_b+SE_c/n_a)^2/((SE_t^2/(n_b^2*(n_b-1)))+(SE_c^2/(n_a^2*(n_a-1))))
+
+p_value<-1-pt(t_stat,free)
+
+```
