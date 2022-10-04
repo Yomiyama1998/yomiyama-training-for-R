@@ -1,0 +1,724 @@
+---
+title: "EC50の計算方法について"
+author: "Tatsuo YAMAGUCHI"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document: default
+editor_options:
+  markdown:
+    wrap: 80
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(drc)
+library(plotly)
+library(rgl)
+library(minpack.lm)
+
+```
+
+## 読み込みパッケージ
+
+```{r eval=FALSE}
+library(tidyverse)
+library(drc)
+library(plotly)
+library(rgl)
+library(minpack.lm)
+```
+
+## はじめに
+
+用量反応曲線はシグモイド曲線（S字曲線）の形を取る。
+シグモイド曲線を取る曲線として以下のものが上げられる。
+
+-   シグモイド曲線を取る曲線
+
+    -   正弦曲線
+
+    -   ロジスティック曲線
+
+    -   プロビット曲線
+
+プロビット曲線
+
+このうちよく使われているものはロジスティク曲線とプロビット曲線である。
+
+-   ロジスティック曲線
+
+説明変数$x$と出現率$p$の関係がロジスティック曲線で表される曲線
+
+$$
+\begin{eqnarray}
+logit (p_k) &=& ln (\frac{p_k}{1-p_k})\\
+            &=&\alpha + \Sigma (\beta_kx_{k,i})+\epsilon \\
+            \\
+            p_k &=& \frac{r_k}{n_k}\, \colon \, p_k \, \,  出現率
+\end{eqnarray}
+$$
+
+以上の数式を$pに関する_k$に関する指数式に変換すると、
+
+$$
+p_k = \frac{e^x}{1+e^x}
+$$
+
+と表すことが出来る。
+
+-   プロビット曲線
+
+説明変数$x$と出現率$p$の関係が累積正規分布曲線で表される曲線
+
+$$
+     \begin{eqnarray}
+    p_k &=& \int_{-\infty}^{z}\frac{1}{\sqrt{2\pi}}exp(-\frac{z^2}{2})dz\\
+     &=&\Phi(z)\\
+    \\
+    \\
+    z &=& \Phi^{-1}(z):\Phi(z)の逆関数\\
+      &=& y-a\\
+    \\
+    \\
+    y=&=&\alpha + \beta x+\epsilon
+     \end{eqnarray}
+$$
+
+## Model選択の際の統計的手法
+
+モデル選択の際、尤度比検定もしくはAIC（赤池情報量規準）が用いられる。
+
+### 尤度とは
+
+確率密度関数に変数に観測値を代入したときに、その確率密度を観測値で評価したときの度合い。つまり。観測値の確率変数に近い「もっともらしい度合い」である。
+
+尤度を目的変数とする関数のことを尤度関数という。
+
+尤度関数の自然対数をとったものを対数尤度関数といい、対数尤度関数あるいは尤度が最も大きくなる最尤推定量、あるいは最尤推定量となり得るパラメータ（最尤推定値）を探索する。
+
+### Wald統計量
+
+推定値を標準誤差の推定値で除した値。平均が、Wald統計量の絶対値、標準偏差が1の正規分布における$-\infty$から0までの値をとる確率の2倍が0に近ければ推定値がゼロに近いと見なすことが出来る。
+
+### 尤度比検定
+
+尤度比検定について説明する前に、逸脱度についてせつめいする。
+
+逸脱度（$D$）とは「あてはまりの悪さ」の指標で、最大対数尤度$logL^*$を用いて、
+
+$$
+D=-2logL^*
+$$
+
+と表される。
+
+ここで最小逸脱度（Full model時の逸脱度）との残差逸脱度と定義する。
+
+$$
+残差逸脱度= -2logL^* -最小D 
+$$
+
+注：Full
+modelとは目的変数の個数だけ観測変数のパラメータをあてはめたものをイメージすればよい。
+
+そして、尤度比検定とは他のモデルの残差逸脱度との差
+
+$$
+\Delta D =-2 \times(log L_1^*-logL_2^*)
+$$
+
+を検定統計量として用いる検定のことである。
+
+この検定統計量を評価できる方法はパラメトリックブートストラップ法という乱数発生によりシミュレーションする方法とparameterの数の差を自由度とする$\chi^2$検定を用いた近似計算方法が用いられる。
+
+「正規分布を仮定出来るなら」、その結果は最小二乗法の推定結果は正規線形モデルに従う最尤法の結果と一致する。そのため逸脱度を最小二乗法での指標である残差平方和を置き換えて、F検定で検定できる。
+
+この場合、残差平方和の差の増分が自由度数（データ数ーパラメータ数)の差の増分より大きいかどうかの判断する。つまり残差平方和の差を自由度数（データ数ーパラメータ数)の差で除したF比
+
+$$
+F=\frac{RSS_{(model_1)}-RSS_{model_2}}{DF_1-DF_2}
+$$
+
+DF:自由度
+
+が1.0より大きくなるかどうかをF検定により判断する。
+
+#### AIC（Akaike Information Criterion）
+
+AICとはモデルの複雑さと、データとの適合度とのバランスの良いモデルを選択するための基準である。
+
+$$
+AIC = -2(ln(L^{*})-k)
+$$
+
+k:パラメータの数(ｋには定数項もパラメータ数として含む)
+
+と表される。このAICの値が小さいほど「あてはまりが良い」モデルであると言える。
+
+そこでモデルのAICの差は
+
+$$
+\Delta AIC =-2\times ln(\frac{L^*_{model_1}}{L^*_{model2}})+2 (DF_1-DF_2) 
+$$
+
+「正規分布を仮定出来るなら」、その結果は最小二乗法の推定結果は正規線形モデルに従う最尤法の結果と一致する。そのため逸脱度を最小二乗法での指標である残差平方和を置き換えることが出来るため、
+
+$$
+\Delta AIC=N\times ln( \frac{RSS_2}{RSS_1})+2(DF_1-DF_2)
+$$
+
+と表すことが出来る。
+
+$$
+AICc=-2ln(L^*)+2k+2\frac{k(k+1)}{n-k-1}
+$$
+
+# EC50計算の具体的方法
+
+## 手計算で求められる簡便な方法
+
+### Reed and Muench法
+
+比例配分法によって$LC_{50}$を求める。
+
+$$
+\begin{eqnarray}
+\frac{(\% positive \, above \,50 \%)-50 \%}{(\% pos.above \, 50 \%)-(\% pos.below \, 50 \% )} &=& proportionate\, distance(PD)\\
+\\
+log (dilution\, above\, 50 \%) -PD \times (dilution \, factor) &=& IC_{50}\\
+\\
+dilution\, factor &=& log (dilution\, above\,50 \% )-log (dilution\, below\, 50 \%)\\
+\end{eqnarray}
+$$
+
+ただこの方法は用量反応関係を純粋に直線になるようにplotする方法であり、plotした0と100の部分が$IC_0$や$IC_{100}$でない可能性がある。そのため、次に説明する方法で求めることが多い。
+
+## ロジスティック曲線を用いた近似
+
+基本的に近似式で使われるモデルは以下のものが上げられる。
+
+#### 3パラメータモデル
+
+$$
+y = \frac{Top}{1+(\frac{r}{100-r})10^{hill(EC_{r}-\log_{10} (x))}}
+$$
+
+Topは最高値。Hill係数はロジスティク曲線の傾きの度合いを表し、$EC_{50}$は右辺の値が最高値と最低値のr％になったときのxである。
+
+#### 4パラメータモデル
+
+$$
+y = Base+\frac{Top-Base}{1+(\frac{r}{100-r})*10^{hill(EC_{r}-\log_{10} (x))}}
+$$
+
+Baseは右辺の最低値、Topは最高値。Hill係数はロジスティク曲線の傾きの度合いを表し、$EC_{r}$は右辺の値が最高値と最低値のr％になったときのxである。
+
+$EC_{50}$を算出する場合は
+
+$$
+\begin{eqnarray}
+y &=& Base+\frac{Top-Base}{1+(\frac{50}{100-50})*10^{hill(EC_{50}-\log_{10} (x))}}\\
+&=&Base+\frac{Top-Base}{1+10^{hill(EC_{50}-\log_{10} (x))}}
+\end{eqnarray}
+$$
+
+となる。
+これを非線形最小二乗法という方法で残差平方和が最も小さくなるパラメータの値を探索する。GraphPadPrismでは探索の方法として、Marquardt法を採用している。
+
+### 例
+
+以下のロジスティクモデルを仮定して、パラメータ推定を行う。
+
+$$
+y =\frac{100}{1+10^{hill(EC_{50}-Conc)}}
+$$
+
+具体的なやり方を以下で説明する。
+
+データセットは以下の通りである。
+
+```{r}
+dat<-read.csv("D:/VBA/Nov_25th_EC50_training.csv",header=TRUE)
+dat<-dat[,-1]
+dat
+```
+
+ExcelやRなどで解析する際は、予め薬物濃度を常用対数に変換して解析することをお勧めする。
+
+まずはグラフをplotしてみて、大方のhill係数やEC50 の幅を推定する。
+というのも、出力されたパラメータが、本来最も最適なパラメータではない、いわゆる局所最適解を示す可能性があるためである
+
+![ExcelによるPlot](images/Excel_Plot_DoseResponse.png "ExcelによるPlot")
+
+![](images/prism_EC50_training_data.png)
+
+Rは以下の通りである。
+
+```{r,echo=FALSE,warning=FALSE}
+resp_a1<-dat %>% dplyr::select(,starts_with("No.inhibitor"))
+colnames(resp_a1)<-NULL
+resp_a2<-c()
+for(i in 1:nrow(resp_a1)){
+  tmp<-c(resp_a1[,i])
+  resp_a2<-append(resp_a2,tmp)
+}
+ConcA<-NA
+
+ConcA<-rep(dat$conc,times=3)
+dat_a<-data.frame(ConcA,resp_a2)
+
+resp_b1<-dat %>% dplyr::select(,starts_with("Inhibitor"))
+colnames(resp_b1)<-NULL
+resp_b2<-c()
+for(i in 1:nrow(resp_b1)){
+  tmp<-c(resp_b1[,i])
+  resp_b2<-append(resp_b2,tmp)
+}
+
+ConcB<-rep(dat$conc,times=3)
+dat_b<-data.frame(ConcB,resp_b2)
+
+colnames(dat_a)<-c("Conc","Response")
+colnames(dat_b)<-c("Conc","Response")
+dat_a<-na.omit(dat_a)
+dat_b<-na.omit(dat_b)
+dat_all<-NA
+dat_all<-rbind(dat_a,dat_b) %>% as_data_frame()
+Group<-rep(c("No_inhibitor","Inhibitor"),c(nrow(dat_a),nrow(dat_b)))
+
+colnames(dat_all)<-c("Conc","Response")
+dat_all<-cbind(dat_all,Group) %>% as_data_frame()
+dat_all$Group <- factor(dat_all$Group,levels = unique(dat_all$Group))
+g<-ggplot(data=dat_all,aes(x=Conc,y=Response,colour=Group))+geom_point()
+g
+```
+
+```{r,echo=FALSE, message=FALSE, r,echo=FALSE,eval=FALSE}
+
+
+conc<-as.vector(dat[,1])
+
+resp<-as.matrix(dat[,2:ncol(dat)])
+
+
+resp_a <- c(resp[,1:3]) #阻害剤が入っていない実験
+resp_b <- c(resp[,4:6]) #阻害剤が入っている実験
+
+
+conc<-rep(conc, 3)
+
+
+dat_a<-data.frame(conc,resp_a)
+
+dat_a<-na.omit(dat_a)
+
+
+dat_b<-data.frame(conc,resp_b)
+
+dat_b<-na.omit(dat_b)
+
+
+
+#パラメータが局所最適解でないか推定するために図示
+
+llf2_3<-function(hill,EC50){
+  sum((y-100/(1+10^(hill%*%(EC50-x))))^2)
+  
+}
+
+
+x<-dat_a$conc
+y<-dat_a$resp_a
+
+
+
+hill_p<-seq(-2,2,2.0)
+EC50_p<-seq(-8,-4,2.0)
+
+
+m<-matrix(0,length(hill_p),length(EC50_p))
+
+for (i in 1:length(hill_p)) {
+ for (j in 1:length(EC50_p)) {
+  m[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+
+
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m) %>% add_surface()
+
+
+hill_p<-seq(-2,2,0.5)
+EC50_p<-seq(-9,-5,0.5)
+
+m2<-matrix(0,length(hill_p),length(EC50_p))
+
+
+for (i in 1:length(hill_p)) {
+  
+ for (j in 1:length(EC50_p)) {
+  m2[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m2) %>% add_surface()
+
+hill_p<-seq(0,1,0.01)
+EC50_p<-seq(-7.5,-6.5,0.01)
+
+
+m3<-matrix(0,length(hill_p),length(EC50_p))
+
+for (i in 1:length(hill_p)) {
+  
+ for (j in 1:length(EC50_p)) {
+  m3[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m3) %>% add_surface()
+
+
+x<-dat_b$conc
+y<-dat_b$resp_b
+
+
+
+hill_p<-seq(-1,5,2.0)
+EC50_p<-seq(-8,-4,2.0)
+
+
+
+m<-matrix(0,length(hill_p),length(EC50_p))
+
+for (i in 1:length(hill_p)) {
+ for (j in 1:length(EC50_p)) {
+  m[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+
+
+plotly::plot_ly(z=m) %>% add_surface(x=EC50_p,y=hill_p,z=m)
+
+
+hill_p<-seq(-1,3,0.5)
+EC50_p<-seq(-9,-5,0.5)
+
+m2<-matrix(0,length(hill_p),length(EC50_p))
+
+
+for (i in 1:length(hill_p)) {
+  
+ for (j in 1:length(EC50_p)) {
+  m2[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m2) %>% add_surface()
+
+hill_p<-seq(0,1,0.01)
+EC50_p<-seq(-6.5,-5.5,0.01)
+
+
+m3<-matrix(0,length(hill_p),length(EC50_p))
+
+for (i in 1:length(hill_p)) {
+  
+ for (j in 1:length(EC50_p)) {
+  m3[i,j]<-llf2_3(hill_p[i],EC50_p[j])
+}
+    
+}
+plotly::plot_ly(x=EC50_p,y=hill_p,z=m3) %>% add_surface()
+
+
+
+```
+
+![No inhibitor](images/plotly_noinhibitor_1-01.png)
+
+この上の図はNo
+inhibitorの残差平方和の大きさを表した図である。X軸がEC50,Y軸がHill係数、Z軸が残差平方和を示している。EC50が6、Hill係数が0付近に解があることが分かる。
+
+![Inhibitor](images/plotly_inhibitor_1-02.png)
+
+上図はInhibitorの残差平方和の大きさを表した図である。X軸がEC50,Y軸がHill係数、Z軸が残差平方和を示している。EC50が6、Hill係数が0付近に解があることが分かる。
+
+### Graphpad Prismを用いる方法
+
+GraphPad prismで非線形回帰を使うためには、データ読み込みの際に「XY
+data」を選択する。
+
+![prism_datainput](images/Prism_select_1.PNG){width="500"}
+
+![EC50_data](images/EC50_data.PNG){width="500"}
+
+「Analyzing Data」タブ
+
+![modelselect](images/EC50_modelselect_1.PNG)
+
+そして、このうち最適なequationを選択する（今回は$log [inhibitor]$ vs responsed
+-Variable slope (log parameters：これは4パラメータモデルで使うequationである。)
+
+![](images/EC50_modelselect_3.PNG){width="400"}
+
+細かいデータは数式などはDetailをクリックして確認する。
+
+![Model select2](images/EC50_modelselect7.PNG){width="500"}
+
+TopとBaseの差が100なので、Bottomに0、Topに100を入力。
+
+![定数値の設定](images/EC50_modelselect5.PNG){width="400"}
+
+すべての設定を終えるとOKをクリック。すると、
+
+![Prism結果](images/Prism_data_outcome1.PNG){width="600"}
+
+Prismによる推定結果は以下のようになる
+
+![](images/Prism_out-01.png){width="900"}
+
+![](images/Prism_out2.png)
+
+そして、結果よりNo No
+inhibitorとInhibitorの$EC_{50}$の95%信頼区間が重なっていないため、Inhibitorでは抑制効果があることが分かった。
+またNO
+inhibitorとInhibitorの間でhill係数の95%信頼区間がで重なっているため、用量反応関係が相似であり左右の平行移動のみであることが読み取れる。
+
+では、Top、Bottom、Hill係数が二群間で同一の場合のモデリングを
+上記と同じ手順で行う。
+
+上記と一点違うのは定数値の設定で、Hill係数の設定を「All data
+shared」にすれば良い。
+
+![](images/EC50_modelselect_9.PNG)
+
+ちなみにTop、Bottom、Hill係数が二群間で同一の場合を仮定した時は、$EC_{50}$から効力比を推定出来る。
+
+$$
+c=\frac{EC_{50}\, in\, no\, inhibitor}{EC_{50}\, in\, inhibitor} 
+$$
+
+ただ効力比を推定する場合には、$EC_{50}$だけでなく$EC_{25}$や$EC_{90}$なども計算した方が良い。
+
+### Excelを用いる方法
+
+データの読み込みが終わった後は、欠損値を除いていく。
+
+![欠損値処理後Data](images/Excel_Dataprecipitation.png){width="500"}
+
+そして、No inhibitor、Inhibitorのパラメータをそれぞれ推定に入る。
+まずはReed-Muench法で算定する。
+
+まずは50%近傍のデータを抽出してきて、
+
+![](images/Reed-Muench-method.png)
+
+No inhibitor
+
+$$
+\begin{eqnarray}
+PD &=&\frac{(\% positive \, above \,50 \%)-50 \%}{(\% pos.above \, 50 \%)-(\% pos.below \, 50 \% )}
+\\EC_{50} &=& Conc \, of \, above\,50 \% -PD \times (dilution \, factor) \\
+\\
+dilution\, factor &=& 
+Conc \, of \, above\,50 \% -Conc \, of \, below\,50 \%\\
+\end{eqnarray}
+$$
+
+PD;proportionate, distance
+
+![](images/Reed-Muench-method_2.png)
+
+次にロジスティク曲線を用いた近似計算方法について説明する。
+まずI2をhill係数、I3をEC50のセルとして、それぞれ初期値を$0$、$-4$と入力する。
+次にDの列に
+
+$$
+pred=\frac{100}{1+10^{hill(EC_{50}-Conc)}}
+$$
+
+となるように数式を打ち込み、
+
+![Excel_pred](images/Excel_pred.png){width="400"}
+
+隣のE列にResponseと各予測値との差(Residue)を求める。
+
+$$
+Residue=(y-\frac{100}{1+10^{hill(EC_{50}-Conc)}})^2
+$$
+
+そしてその横の列に各Residueの2乗を求める。
+
+![Excel_Residue](images/Excel_Residue_1.png){width="400"}
+
+そして、その残差平方和を足し合わせる。
+
+![Excel_Residue_sum](images/Excel_Residue_sum.png){width="500"}
+
+この残差平方和が最も小さくなるパラメータを見つけるというものが非線形最小二乗法の原理である。
+Excelではソルバーを起動して、この残差平方和が最小になるような条件を探索する。
+
+まずソルバーの追加はファイルのタブのオプションから行う。
+
+![Excel_addin_1](images/Excel_addin_1-01.png)
+
+![Excel_addin_2.](images/Excel_addin_2.png){width="300"}
+
+ソルバーはデータのタブの右端に存在するところから起動する。
+
+![Excel_solver起動](images/Excel_solver_1.png)
+
+このソルバーによる探索の際、予め制約条件を入力するとより正確なパラメータを推定しやすくなる。
+
+今回は
+
+$$
+\begin{eqnarray}
+0\leq hill \leq 20\\
+-10 \leq EC_50 \leq -4
+\end{eqnarray}
+$$
+
+の条件、解決方法「GRG非線形」で探索を行う。
+
+![Excel_solver_param](images/Excel_solver_param.png){width="300"}
+
+するとI5の値が最小化され、I2、I3に入力したhill係数、EC50の値が求まる。（注：このとき、大域解でなく局所最適解が出力され、グラフから予測されるパラメータと比較しおかしいパラメータが出力される場合がある。このときは制約条件変更などを行うこと。）
+
+![Excel_Solver結果](images/Excel_Solveroutcome.png){width="300"}
+
+#### 信頼区間計算
+
+##### 求め方1
+
+そして、その横のK5、L5に今回の関数をhill係数、EC50のパラメータで微分した勾配($Grad$)を入力する。
+入力する計算式は、
+
+Hill係数の勾配関数
+
+$$
+\frac{\delta function}{\delta hill } = \frac{\frac{100}{1+10^{(hill+\frac{1}{2}h)(EC_{50}-Conc)}}-\frac{100}{1+10^{(hill-\frac{1}{2}h)(EC_{50}-Conc)}}}{h}
+$$
+
+$EC_50$の勾配関数
+
+$$
+\frac{\delta function}{\delta EC_{50} } = \frac{\frac{100}{1+10^{(hill)((EC_{50}+\frac{1}{2}h)-Conc)}}-\frac{100}{1+10^{(hill)((EC_{50}-\frac{1}{2}h)-Conc)}}}{h}
+$$
+
+である。（ちなみに勾配は中心差分で計算している。）
+
+実際には I11に$h={10}^{-6}$と打ち込む。 そして、各xについて勾配を計算する。
+その後、計算した各勾配を転置させた行列と転置させていない行列を掛け合わせる。
+
+![Excel_MMULT](images/Excel_MMULT.png){width="300"}
+
+そして計算した行列の逆行列を求め、
+
+![Excel_MINVERSE](images/Excel_MINVERSE.png){width="300"}
+
+そしてソルバーで最小化した残差平方和（Residue）を自由度（今回はデータの大きさからパラメータ2を引いた値の25）で割り、先ほどの行列と掛け合わせる。
+
+$$
+Ve = \frac{Residue}{n-the\, number\, of\, parameter} \times (\, (Grad)^tGrad \, ))^{-1}
+$$
+
+そして各行列の対角項の平方根
+
+$$
+Std.error =\sqrt{V_e}
+$$
+
+をとると、hill係数とEC50の標準誤差が求められる。
+また標準誤差に両側97.5%に入るt統計量を掛けると、信頼区間が求められる。
+
+$$
+Confidence\,interval =mean\pm Std.error\times t((0.975,df)
+$$
+
+自由度は
+
+$$
+df=n(データの数）- k(パラメータの数)
+$$
+
+また決定係数は、
+
+$$
+R^2=1- \frac{(y_{obs}-y_{Pred})^2}{n-k}\div\frac{(y{obs}-\hat{y})^2}{n-1}
+$$
+
+で求められる。
+
+以上の手順よりNo　inhibitorの結果は下記のようになる。
+
+![No_inhibitor結果](images/Excel_Noinhibitor_Std.error-01.png)
+
+Inhibitorの項も同様にして計算する。
+
+Inhibitorの値は以下の通りである。
+
+![Inhibitor結果](images/Excel_Inhibitor_Std.error-01.png)
+
+Hill係数の値が二群間で共通の場合は以下のように行う。
+
+まずは、No inhibitorの最終行の一個下の行にInhibitorのデータを貼り付ける。
+次に、No inhibitorを0、Inhibitorを1と各処理群に0、1の因子を割り付ける。
+そして、以下の数式を入力する。
+
+$$
+y= \frac{100}{1+10^{hill*(EC_{50}-conc+\beta \times Group)}}
+$$
+
+後の手順は、これまで説明したように残差平方和を求め、Solverで各係数の値を変数にして、残差平方和が小さくなるようにすればよい。
+
+結果は以下のようになる。
+
+![](images/Excel_Std_out.png)
+
+##### 求め方2
+
+求め方2の方が求め方1と比べて、より正確な信頼区間を求められる。
+
+求め方2では、Hill係数が2群間で同じ場合で説明する。
+
+まず、上記で求めた最小値を取った残差平方和に$Ve\div df$、及びに$Ve\div df$に5%のときのF分布を掛け合わせたに$F(0.05,df)\times Ve \div df$を足し合わせた残差平方和を求める。
+
+次に、$\delta$を0.5に設定しこれを-2.5,2.5の範囲を取る。そして、この$\delta$をEC50に足し合わせる。
+
+
+$$
+EC_{50_p}= EC_{50_{min}}+\delta
+$$
+
+
+そして、-2.5から２.5の範囲のEC50を固定して、残差平方和が最も小さくなるようなHill係数と$\beta$をソルバーで求める。
+
+そして求まった残差平方和をExcelでプロットし、近似曲線を出す。
+
+そして近似曲線の係数を各セルに入力し、上記で求めた「$Ve\div df$と$F(0.05,df)\times Ve \div df$を足し合わせた残差平方和」になるような正負の$\delta$をゴールシークを用いて推定する。
+
+求まった$Ve\div df$の方の$\delta$の絶対値の平均を取ったものが、EC50の標準誤差である。
+そして、F分布を足し合わせて求まった$\delta$を、先ほどのEC50の式に代入した値が、EC50の95%信頼区間である。
+
+そして上記で求まったEC50の95％信頼区間で値を固定して、残差平方和が最小化するHill係数、$\beta$をソルバーで求める。
+
+
+同じようにHill係数の標準誤差、95%信頼区間を求める。
+
+結果は以下のようになる。
+
+
+
