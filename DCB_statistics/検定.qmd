@@ -1,0 +1,39 @@
+---
+title: "検定"
+format: html
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev = "cairo_pdf",dev.args = list(family = "ipaexg"))
+
+library(tidyverse)
+library(drc)
+library(plotly)
+library(rgl)
+library(minpack.lm)
+library(ggsci)
+library(cowplot)
+library(grid)
+
+```
+
+
+
+# 検定
+
+## 二群間の検定
+
+### 対応の無い検定
+
+```{r,echo=FALSE}
+
+
+```
+
+### 対応のある検定
+
+## 三群以上の処理
+
+## 分散分析

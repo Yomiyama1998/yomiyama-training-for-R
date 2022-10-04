@@ -1,0 +1,706 @@
+---
+title: "DCB統計処理法"
+author: "TatsuoYAMAGUCHI"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: 
+    latex_engine: lualatex
+documentclass: ltjsarticle 
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev = "cairo_pdf",dev.args = list(family = "ipaexg"))
+
+library(tidyverse)
+library(drc)
+library(plotly)
+library(rgl)
+library(minpack.lm)
+library(ggsci)
+library(cowplot)
+library(grid)
+
+```
+
+# はじめに
+
+細胞生物学分野に所属する人間が最低限の統計処理を行うことができるように記した。 そのため導出等無視して記載していくため、人によっては分かりづらい等あるかもしれない。そのときは以下の書籍等を参考にして欲しい。 以下の書籍を参考文献であげておく。
+
+### 統計学入門
+
+### 自然科学のための統計学
+
+東京大学教養学部統計学教室　東京大学出版会
+
+### 心理統計学の基礎
+
+### 続　心理統計学の基礎
+
+南風原朝和著　有斐閣アルマ
+
+### 多重比較法の基礎
+
+永田靖・吉田道弘　著　サイエンティスト社
+
+### 実験計画法入門
+
+永田靖　著　日科技連
+
+### サンプルサイズの決め方\*\*
+
+永田靖　著　朝倉書店
+
+### データ解析のための統計モデリング入門
+
+久保拓弥　著　岩波書店
+
+# 実験計画
+
+## 実験計画
+
+## 誤差伝搬
+
+# データの要約
+
+データが出たらまずはグラフの描画である。 ここではフローサイトメトリーを例に説明しよう。 例えばフローサイトメトリーと呼ばれる細胞1個あたりの蛍光強度を測定する方法がある。 ここでは細胞の膜タンパク質の量を蛍光抗体を用いて定量化すると仮定する。
+
+この仮想実験では、あるタンパク質Xを導入した細胞株、Xをknock down した細胞株、未処理の細胞株と比較した。
+
+まず測定時にx軸（FSC（前面散乱光））とy軸（SSC（側面散乱光））から測定したい細胞の範囲を決める。 このグラフのことを散布図もしくはpoint plotと呼ぶ。
+
+```{r,echo=FALSE,warning=FALSE}
+
+
+#point plot
+
+x<-rnorm(5000,600,100)
+y<-0.8*x+10+c(rnorm(5000,200,100))
+dat<-data.frame(x,y)
+
+x<-rnorm(500,100,20)
+y<-0.8*x+10+c(rnorm(500,100,20))
+dat2<-data.frame(x,y)
+
+dat<-rbind(dat,dat2)
+
+Group<-rep(c("Analysis Sample","Others"),times =c(5000,500))
+dat<-cbind(dat,Group)
+
+ggplot(dat,aes(x,y,colour=Group))+geom_point()+labs(title = "Flowcytometory pointplot", x = "FSC", y = "SSC")+theme_bw()+ theme(axis.title = element_text(face = "bold"),
+    axis.text = element_text(colour = "black"),
+    axis.text.x = element_text(size = 15),
+    axis.text.y = element_text(size = 15,
+        colour = "black"), plot.title = element_text(size = 20,
+        face = "bold", hjust = 0.5), panel.background = element_rect(colour = "white"),
+    plot.background = element_rect(fill = "white"))+scale_colour_manual(values=c("Salmon","Black"))
+
+
+```
+
+このサーモン色の範囲の細胞の膜タンパク質の量を測定すると、ヒストグラムと呼ばれる頻度を表すグラフを出力できる。 ヒストグラムとは、「ある特定のデータを区間ごとに区切り、各区間の個数や数値のばらつきを棒グラフに似た形の図で表現するグラフ」である。
+
+今回の仮想実験の結果から以下のようなヒストグラムを得ることが出来た。
+
+```{r echo=FALSE}
+#histogram
+value<-c(abs(rnorm(15000,10,100)),abs(rnorm(15000,2.5*10^6,5*10^7)),abs(rnorm(15000,5*10^3,5*10^4)),abs(rnorm(15000,7.5*10^6,7.5*10^7)))
+
+grp<-rep(c("Cont","WT","Protein X overexpression","Knock Down"),each=15000)
+
+
+grp<-factor(grp,levels=unique(grp))
+
+dat<-data.frame(value,grp)
+
+
+xbreaks<-c(0.01,1.0,100,10^4,10^6,10^8)
+
+ggplot(dat,aes(x=value,fill=grp),alpha=0.8)+geom_histogram(binwidth = 0.2)+geom_density(aes(y = ..count..,color = grp, alpha = 0.2), show.legend = F)+scale_x_log10(breaks=xbreaks)+labs(title = "Quantification of Transmembrane protein", x = "Fluorescence Intensity", y = "Counts")+theme_bw()+ theme(axis.title = element_text(face = "bold"),
+    axis.text = element_text(colour = "black"),
+    axis.text.x = element_text(size = 15),
+    axis.text.y = element_text(size = 15,
+        colour = "black"), plot.title = element_text(size = 18,
+        face = "bold", hjust = 0.5), panel.background = element_rect(colour = "white"),
+    plot.background = element_rect(fill = "white")) 
+
+
+
+```
+
+このグラフはx軸が蛍光強度、y軸が対数蛍光強度の頻度を表しており、各色は各細胞株を示している。この結果から、 (※実際の検出では$1.0\times 10^6$以上で測定することはない）
+
+今回サンプルサイズ7で実験を行い、それぞれの各細胞株の蛍光強度を数値でまとめると以下のような結果が得られた。
+
+```{r echo=FALSE,warning=FALSE}
+dat_seisei<-function(Name,n,length,mean,sd){
+  dat_k<-data.frame()
+  for (i in 1:n) {
+    tmp<-matrix(length,3)
+    value<-abs(rnorm(length,mean,sd)+rnorm(length,mean,1000*sd))
+    group<-rep(Name,length)
+    number<-rep(i,length)
+    tmp<-data.frame(value,group,number)
+    dat_k<-rbind(dat_k,tmp)
+  }
+  dat_k
+}
+
+WT<-dat_seisei("WT",7,15000,2.5*10^6,5*10^7)
+X_over<-dat_seisei("Over expression",7,15000,5*10^3,5*10^4)
+X_knock<-dat_seisei("Knock down",7,15000,7.5*10^6,7.5*10^7)
+
+dat_n<-rbind(WT,X_over,X_knock)
+
+dat_n$group<-factor(dat_n$group,levels=unique(dat_n$group))
+
+
+
+summise_dat<-dat_n %>% group_by(group,number) %>% summarise(n=length(value),mean=mean(value),geo_mean=exp(mean(log(value))),median=median(value),sd=sd(value),CV=sd/mean,mean2=abs(mean+rnorm(length(mean),mean,sd)),geo_mean2=abs(geo_mean+rnorm(length(geo_mean),geo_mean/1000,geo_mean)))
+
+
+summise_dat<-summise_dat %>%select(group,number,n,mean2,geo_mean2,median,sd,CV) %>% rename(mean=mean2,geo_mean=geo_mean2)
+
+summise_dat %>% filter(group=="WT") %>% as_tibble() %>% gt::gt()
+
+summise_dat %>% filter(group=="Over expression") %>% as_tibble() %>% gt::gt()
+
+summise_dat %>% filter(group=="Knock down") %>% as_tibble() %>% gt::gt()
+
+```
+
+この図で表されるのはnumberが本実験におけるreplicate、つまりサンプルサイズ、meanが算術平均(arithmetic mean)、geo meanが幾何平均(geometric mean)、sdが標準偏差(standard deviation)、CVが変動係数（標準偏差を算術平均で割った値）である。
+
+幾何平均は、
+
+$$
+Geometric\space mean=\sqrt[n]{x_1\times x_2 \cdots x_n}\\
+=(\Pi x_i)^{1/n}\\
+=\exp(\frac{1}{n}\Sigma \ln( x_i))
+$$ である。 ここで対数正規分布について説明する。 対数正規分布は
+
+$$
+f(x)=\frac{1}{\sqrt{2\pi\sigma}x}\exp(\frac{\ln(x)-\mu}{2\sigma^2})
+$$ で表される分布であり、 平均値が $$
+E(x) = \exp(µ +\frac{σ^2}{2})
+$$ 分散が $$
+V(x)=\exp(2µ + σ^2)(\exp(σ^2) − 1)
+$$ 中央値が $$
+Median=\exp(\mu)
+$$ 最頻値が $$
+Mode=\exp(\mu-\sigma^2)
+$$ と表される。
+
+```{r,echo=FALSE}
+
+data_hist2<-ggplot()+geom_path(data=data.frame(X=x<-seq(0,10,by=0.0001), Y=dlnorm(x,1,1)),aes(x=X,y=Y))
+data_hist2<-data_hist2+geom_vline(xintercept=exp(1), color="red", linetype = "longdash")+
+  geom_vline(xintercept=exp(1-1^2), color="blue", linetype = "longdash")+
+  geom_vline(xintercept=exp(1+1^2/2), color="black", linetype = "longdash")
+data_hist2<-data_hist2+geom_text(aes(x=1.2,y=0.20),label="最頻値",color="blue")+
+  geom_text(aes(x=2.8,y=0.20),label="中央値",color="red")+
+  geom_text(aes(x=4,y=0.20),label="平均値",color="black")
+
+data_hist2
+```
+
+上記の数値ではわかりにくいので、WTで除したときの比率でグラフを描画してみる。 そうすると以下のようになる。
+
+```{r echo=FALSE}
+
+WT_mean<-summise_dat %>% dplyr::select(group,number,mean) %>% group_by(group) %>% filter(group=="WT")%>% summarise(mean=mean(mean))
+
+summise_dat<-summise_dat %>%select(group,mean) %>% mutate(mean_per=mean/WT_mean$mean) 
+
+
+
+g<-ggplot(summise_dat,aes(x=group,y=mean_per,colour=group))+geom_boxplot()+scale_y_log10()+
+  labs(title = "Box plot of MFI")+theme_bw()+ theme(axis.title = element_text(face = "bold"),
+    axis.text = element_text(colour = "black"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10,
+        colour = "black"), plot.title = element_text(size = 18,
+        face = "bold", hjust = 0.5), panel.background = element_rect(colour = "white"),
+    plot.background = element_rect(fill = "white"))
+g<-g + theme(axis.title = element_text(size = 19),
+    axis.text = element_text(face = "bold"),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 15)) +labs(x = "Group", y = "MFI", colour = "Group")+ theme(axis.text.x = element_text(angle = 45, hjust = 1,size=12)) 
+
+g
+
+summries<- summise_dat %>% group_by(group) %>% summarise(n=length(mean_per),mean_g=mean(mean_per),sd_g=sd(mean_per))
+
+g2<-ggplot(summries,aes(x=group,y=mean_g))+geom_bar(aes(fill=group),stat = "identity")+ geom_errorbar(aes(ymin = mean_g - sd_g, ymax = mean_g + sd_g, width = 0.3))+labs(title = "Bar plot of MFI")+theme_bw()+ theme(axis.title = element_text(face = "bold"),
+    axis.text = element_text(colour = "black"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10,
+        colour = "black"), plot.title = element_text(size = 18,
+        face = "bold", hjust = 0.5), panel.background = element_rect(colour = "white"),
+    plot.background = element_rect(fill = "white"))
+
+
+g2<-g2 + theme(axis.title = element_text(size = 19),
+    axis.text = element_text(face = "bold"),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 15)) +theme(axis.title = element_text(size = 19),
+    axis.text = element_text(face = "bold"),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 15)) +labs(x = "Group", y = "MFI", colour = "Group")+ theme(axis.text.x = element_text(angle = 45, hjust = 1,size=12))
+
+g2
+
+```
+
+上のグラフを箱ひげ図（Box plot）、下のグラフを棒グラフ(Bar plot)と呼ぶ。このグラフだと箱ひげ図が見づらいので、WTを例に箱ひげ図について説明する。
+
+```{r echo=FALSE,eval=FALSE}
+
+g3<-summise_dat %>% filter(group=="WT")%>%ggplot(aes(x=group,y=mean_per))+geom_boxplot()+ labs(title = "Box plot of MFI")+theme_bw()+ theme(axis.title = element_text(face = "bold"),
+    axis.text = element_text(colour = "black"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10,
+        colour = "black"), plot.title = element_text(size = 18,
+        face = "bold", hjust = 0.5), panel.background = element_rect(colour = "white"),
+    plot.background = element_rect(fill = "white"))
+g3<-g3 + theme(axis.title = element_text(size = 19),
+    axis.text = element_text(face = "bold"),
+    legend.text = element_text(size = 20),
+    legend.title = element_text(size = 20)) +labs(x="",y = "MFI")
+
+g3<-g3 + theme(axis.text = element_text(size = 20),
+    axis.text.x = element_text(size = 20),
+    axis.text.y = element_text(size = 15))
+
+g3
+
+
+
+```
+
+![](220406_boxplot.png){width="500"}
+
+Box plotの上側のひげが最大値、Boxの上側が75 (%)パーセンタイル（第三四分位数）、中心の横線が50(%)パーセンタイル（Median）、Boxの下側が25 (%）パーセンタイル（第一四分位数）、下側のひげが最小値である。
+
+## 分布
+
+# 検定
+
+ではここで先ほどのデータのWTとOverexpressionのあるタンパク質XのmRNA発現量を確かめるために、RT-qPCRをおこなった。 このとき得られたデータが以下のようになる。
+
+```{r, echo=FALSE}
+
+WT_ttest<-matrix(data=c(rnorm(3,20,2),rnorm(3,14,2)),3,byrow=FALSE)
+colnames(WT_ttest)<-c("X","GAPDH")
+Overexpression_ttest<-matrix(data=c(rnorm(3,28,2),rnorm(3,14,2)),3,byrow=FALSE)
+colnames(Overexpression_ttest)<-c("X","GAPDH")
+Group_ttest<-rep(c("WT","Overexpression"),each=3)
+
+dat_ttest<-as.data.frame(rbind(WT_ttest,Overexpression_ttest))
+dat_ttest<-as.data.frame(cbind(Group_ttest,dat_ttest))
+
+dat_ttest<-dat_ttest %>%  dplyr::mutate(delta= X-GAPDH)
+
+dat_ttest$Group<-factor(dat_ttest$Group,levels=unique(dat_ttest$Group))
+
+
+ggplot(dat_ttest,aes(x=Group,y=delta))+geom_point()+theme_bw()
+
+
+
+```
+
+このとき、実験で取り出してきたデータが母集団から取り出してきた、代表するデータであるならば、この平均値の推定を 抽出する大元の母集団の平均に違いが見られるかを判別する、これが統計学的検定である。
+
+しかし統計学的検定で有意な差が見られても、生物学の観点から考えて有意でない場合も有るし、逆に統計学検定が有意でなくても生物学の観点から考えて有意な場合もある。 こうした場合をできるだけ減らすために、予め実験をおこなう際にサンプルサイズ（nをいくつ取るのか）を決めたり、検出力の高い検定方法を選択したりする必要がある。
+
+ここで初めてt検定である。 t検定は、サンプルが正規分布に従うと仮定したときに2標本間の平均に差があるかどうかを見るときに使う検定の一つである。
+
+
+```{R,echo=FALSE}
+
+p <- ggplot(data=data.frame(X=c(-4,4)), aes(x=X))
+
+p <- p + stat_function(fun=dnorm, args=list(mean=0, sd=.5))
+p <- p + stat_function(fun=dnorm, args=list(mean=2, sd=.5))+theme_bw()
+
+p<-p + geom_vline(xintercept=0,colour="red",linetype = "longdash")+geom_vline(xintercept=2,colour="red",linetype = "longdash")
+p<-p+annotate("segment",x=0,xend=2,y=1,yend=1,
+           arrow=arrow(ends = "both",angle = 90,length = unit(.2,"cm")), size=2)+
+  annotate("segment",x=0,xend=2,y=1,yend=1,
+           arrow=arrow(),size=2)+
+  annotate("segment",x=2,xend=0,y=1,yend=1,
+           arrow=arrow(),size=2)
+p<-p + theme(axis.title = element_text(size = 15,
+    face = "bold"), axis.text = element_text(size = 15,
+    face = "bold", colour = "black"), plot.title = element_text(size = 15,
+    face = "bold")) +labs(y = "Y")+geom_text(aes(x=1, y=1.25), label="この2つの平均の差を検出する",size=8)
+
+
+
+```
+
+
+t検定にはStudentのt検定、Welchのt検定の2つの種類が存在する。
+
+Studentのt検定は2つの標本間の分散が等しいと仮定したときにもちいるｔ検定である。
+一方Welchのｔ検定は、2つの標本間の分散が等しいと仮定しないときに用いるt検定である。
+
+
+教科書的には、2つの標本間の分散に差があるのかを調べるF検定の結果（一般的には有意水準$\alpha$を5(%)と設定するが、文献によっては10(%)~50(%)と設定することを推奨している。理由は後述する）を踏まえて、2つの標本間に差があると言えない場合はStudentのt検定、差があるといえる場合はWelchのt検定を選択し、検定をすることになっている。
+しかしながら、F検定をせずにそのままWelchのt検定を行うことを推奨している人も存在する。
+というのも多重比較でも同じ問題が起こるのだが、以下の表を参考にして欲しいのだが、F検定→t検定と2段階で検定を行うと有意水準を保つことが出来なくなる。
+
+```{r,echo=FALSE}
+
+n<-5000
+
+
+test<-function(n,vp,p_val){
+p<-NULL 
+for (i in 1:n) {
+x = rnorm(10, mean=0, sd=1.5)
+y = rnorm(30, mean=0, sd=1.0)
+vp = var.test(x,y)$p.value
+p[i] = t.test(x, y, var.equal=(vp > 0.1))$p.value
+
+}
+result_p<- p <p_val
+out<-sum(result_p)/n    
+}
+
+vp_list<-c(0.05,0.1,0.2,0.25,0.5)
+
+n<-5000
+p_val<-c(0.05,0.025,0.01)
+
+
+test_tmp<-data.frame()
+
+for (i in 1:length(p_val)) {
+  for (k in 1:length(vp_list)) {
+   test_tmp[i,k]<-test(n,vp_list[k],p_val[i]) 
+   }
+}
+
+test2<-function(n,p_val){
+
+p<-NULL 
+for (i in 1:n) {
+x = rnorm(10, mean=0, sd=1.5)
+y = rnorm(30, mean=0, sd=1.0)
+p[i] = t.test(x, y, var.equal=FALSE)$p.value
+
+}
+result_p<- p < p_val
+out<-sum(result_p)/n    
+}
+
+test_tmp2<-NULL
+for (i in 1:length(p_val)) {
+test_tmp2[i]<-test2(n,p_val[i])  
+}
+
+
+test3<-function(n,p_val){
+
+p<-NULL 
+for (i in 1:n) {
+x = rnorm(10, mean=0, sd=1.5)
+y = rnorm(30, mean=0, sd=1.0)
+p[i] = t.test(x, y, var.equal=TRUE)$p.value
+
+}
+result_p<- p < p_val
+out<-sum(result_p)/n    
+}
+
+test_tmp3<-NULL
+for (i in 1:length(p_val)) {
+test_tmp3[i]<-test3(n,p_val[i])  
+}
+
+
+test_tmp<-cbind(test_tmp,test_tmp2,test_tmp3)
+
+rownames(test_tmp)<-p_val
+colnames(test_tmp)<-c(vp_list,"Welch","Student")
+
+sims<- test_tmp %>% tibble::as_tibble() %>% gt::gt()
+sims
+
+```
+
+
+```{r}
+
+sims1<-function(sims,na,nb,vp_list,p_val,sdr){
+  test_tmpt<-matrix(0,1,3)
+  test_tmp<-data.frame()
+  test_tmp2<-data.frame()
+  test_tmp3<-data.frame()
+for (i in 1:length(p_val)) {
+  for (k in 1:length(vp_list)) {
+   test_tmpt[1,1]<-test(n,na,nb,vp_list[k],p_val[i],sdr)
+   test_tmpt[1,2]<-vp_list[k]
+   test_tmpt[1,3]<-p_val[i]
+   test_tmp <- rbind(test_tmp,test_tmpt)
+   }
+  test_tmp2[i,1]<-test2(n,na,nb,p_val[i],sdr) 
+  test_tmp2[i,2]<-"Welch"
+  test_tmp2[i,3]<-p_val[i]
+  test_tmp3[i,1]<-test3(n,na,nb,p_val[i],sdr) 
+  test_tmp3[i,2]<-"Student"
+  test_tmp3[i,3]<-p_val[i]
+}
+  test_tmp<-rbind(test_tmp,test_tmp2,test_tmp3)
+  print(test_tmp)
+}
+out1<-sims1(sims,3,3,vp_list,p_val,1)
+
+out<-data.frame()
+for (i in 1:length(sdrlist)) {
+  a<-sims1(sims,3,3,vp_list,p_val,sdrlist[i])
+  a<-cbind(a,sdrlist[i])
+  out<-rbind(out,a)
+}
+out$`sdrlist[i]`
+
+out_0.5<-out %>% filter(`V3`==0.05)
+ggplot(out_0.5,aes(x=`sdrlist[i]`,y=`V1`,colour=`V2`))+geom_line()+theme_bw()
+```
+
+
+
+```{r}
+
+
+test<-function(sims,na,nb,vp,p_val,sdr){
+p<-NULL 
+for (i in 1:sims) {
+x = rnorm(na, mean=0, sd=1.0)
+y = rnorm(nb, mean=0, sd=sdr*1.0)
+vp = var.test(x,y)$p.value
+p[i] = t.test(x, y, var.equal=(vp > 0.1))$p.value
+}
+result_p<- p <p_val
+out<-sum(result_p)/sims  
+
+}
+
+test2<-function(sims,na,nb,p_val,sdr){
+
+p<-NULL 
+for (i in 1:sims) {
+x = rnorm(na, mean=0, sd=1.0)
+y = rnorm(nb, mean=0, sd=sdr*1.0)
+p[i] = t.test(x, y, var.equal=FALSE)$p.value
+
+}
+result_p<- p < p_val
+out<-sum(result_p)/sims
+
+}
+
+test3<-function(sims,na,nb,p_val,sdr){
+
+p<-NULL 
+for (i in 1:sims) {
+x = rnorm(na, mean=0, sd=1.0)
+y = rnorm(nb, mean=0, sd=sdr)
+p[i] = t.test(x, y, var.equal=TRUE)$p.value
+
+}
+result_p<- p < p_val
+out<-sum(result_p)/sims 
+}
+
+sims<-1000
+
+test3(sims,3,3,p_val[1],0.5)
+
+
+
+sims1<-function(sims,na,nb,vp_list,p_val,sdr){
+  test_tmp<-data.frame()
+  test_tmp2<-NULL
+  test_tmp3<-NULL
+for (i in 1:length(p_val)) {
+  for (k in 1:length(vp_list)) {
+   test_tmp[i,k]<-test(n,na,nb,vp_list[k],p_val[i],sdr)
+   }
+  test_tmp2[i]<-test2(n,na,nb,p_val[i],sdr) 
+  test_tmp3[i]<-test3(n,na,nb,p_val[i],sdr) 
+}
+  test_tmp<-cbind(test_tmp,test_tmp2,test_tmp3)
+  rownames(test_tmp)<-p_val
+  colnames(test_tmp)<-c(vp_list,"Welch","Student")
+  print(test_tmp)
+}
+
+out1<-sims1(sims,3,3,vp_list,p_val,1)
+
+out<-matrix()
+
+sdrlist<-seq(0.1,4,by=0.1)
+
+for (i in 1:length(sdrlist)) {
+out_tmp<-sims1(sims,3,3,vp_list,p_val,sdrlist[i])
+out_tmp<-data.frame(out_tmp)
+assign(paste0("out_",i),out_tmp)
+}
+
+a<-matrix()
+
+for (i in 1:8) {
+a[i]<-get(paste0("out_",i))
+  
+}
+
+out<-NULL
+for (i in 1:length(sdrlist)) {
+  a<-sims1(sims,3,3,vp_list,0.05,sdrlist[i])
+  a<-t(a)
+  a<-cbind(a,sdrlist[i])
+  out<-rbind(out,a)
+}
+sims1(sims,3,3,vp_list,0.05,sdrlist[i])
+
+out_tmp<-sims1(sims,3,3,vp_list,p_val,1)
+
+```
+
+
+```{r echo=FALSE}
+Ftest_out<-var.test(delta~Group,data=dat_ttest)
+Ftest_out
+
+ttest_out<-t.test(delta~Group,data=dat_ttest)
+t1_sum<-c(ttest_out$method,ttest_out$statistic,ttest_out$parameter,
+          ttest_out$p.value,ttest_out$alternative)
+Pval_out<- t1_sum %>% tibble::as_tibble() %>% gt::gt()
+ttest_out
+```
+
+```{r echo=FALSE}
+
+WT_t<-summise_dat %>% filter(group=="WT")
+Knockdown_t<-summise_dat %>% filter(group=="Knock down")
+t_test_data<-rbind(WT_t,Knockdown_t)
+
+
+
+t_test_data<-t_test_data %>%dplyr::select(group,mean_per) %>% rename(mean=mean_per)
+
+Pval_out<-matrix(NA,4,5)
+
+colnames(Pval_out)<-c("method","t_statistics","df","p-value","alternative")
+
+t1<-t.test(mean~group,t_test_data,alternative ="two.sided",var.equal = TRUE)
+
+t2<-t.test(mean~group,t_test_data,alternative ="less",var.equal = TRUE)
+
+t3<-t.test(mean~group,t_test_data,alternative ="two.sided")
+
+t4<-t.test(mean~group,t_test_data,alternative ="less")
+
+
+t1_sum<-c(t1$method,t1$statistic,t1$parameter,t1$p.value,t1$alternative)
+
+t2_sum<-c(t2$method,t2$statistic,t2$parameter,t2$p.value,t2$alternative)
+
+t3_sum<-c(t3$method,t3$statistic,t3$parameter,t3$p.value,t3$alternative)
+
+t4_sum<-c(t4$method,t4$statistic,t4$parameter,t4$p.value,t4$alternative)
+
+Pval_out[1,]<-t1_sum
+Pval_out[2,]<-t2_sum
+Pval_out[3,]<-t3_sum
+Pval_out[4,]<-t4_sum
+
+
+Pval_out %>% tibble::as_tibble() %>% gt::gt()
+
+```
+
+```{r echo=FALSE}
+
+#barplot
+
+par(family = "Yu Gothic")
+
+x2<-c(10,20,20,50,70,80,60,80,90)
+col<-rep(c("WT","KO1","KO2"),each=3)
+col<-factor(col,levels=unique(col))
+
+dat<-data.frame(x2,col)
+
+theme_set(theme(text = element_text(family = "YuGothic")))
+
+g<-ggplot(dat,aes(x=col,y=x2))+theme_bw() +geom_point()+ylim(0,100)
+g<-g + theme(axis.title = element_text(face = "bold"),
+    axis.text = element_text(colour = "black"),
+    axis.text.x = element_text(size = 15),
+    axis.text.y = element_text(size = 15,
+        colour = "black"), plot.title = element_text(size = 20,
+        face = "bold", hjust = 0.5), panel.background = element_rect(colour = "white"),
+    plot.background = element_rect(fill = "white")) +labs(title = "point plot in x-axis is category variate", x = NULL, y = NULL)
+g
+
+# boxplot
+boxplot(x2~col,dat,xlab = "",ylab="",main="箱ひげ図")
+
+
+#棒グラフ
+mean2<-tapply(x2,col,mean)
+sd<-tapply(x2,col,sd)
+bar<-barplot(mean2,ylim =c(0,100),main="棒グラフ")
+bar<-arrows(bar,mean2-sd,bar,mean2+sd, code = 3, lwd = 1, angle = 90,length = 0.1)
+
+
+
+
+#histgram
+
+x<-rnorm(50,0,10)
+hist(x,main="ヒストグラム",ylim=c(0,20))
+
+rlnorm2 <- function(n, mean=1, sd=1) {
+  sdlog <- sqrt(log((sd/mean)^2 + 1))
+  meanlog <- log(mean) - (sdlog^2) / 2
+  rlnorm(n, meanlog = meanlog, sdlog = sdlog)
+}
+
+
+```
+
+# 検定
+
+## 二群間の検定
+
+### 対応の無い検定
+
+```{r,echo=FALSE}
+
+
+```
+
+### 対応のある検定
+
+## 三群以上の処理
+
+## 分散分析
+
+# 推定
+
+## 線形回帰モデル
+
+### 単回帰分析
+
+### 重回帰分析
+
+## 非線形回帰モデル
+
+### $EC_{50}$ $IC_{50}$ の推定

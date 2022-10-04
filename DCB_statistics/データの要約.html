@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.649">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="TatsuoYAMAGUCHI">
+
+<title>データの要約</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+<script src="データの要約_files/libs/clipboard/clipboard.min.js"></script>
+<script src="データの要約_files/libs/quarto-html/quarto.js"></script>
+<script src="データの要約_files/libs/quarto-html/popper.min.js"></script>
+<script src="データの要約_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="データの要約_files/libs/quarto-html/anchor.min.js"></script>
+<link href="データの要約_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="データの要約_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="データの要約_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="データの要約_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="データの要約_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">データの要約</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>TatsuoYAMAGUCHI </p>
+          </div>
+  </div>
+    
+    
+  </div>
+  
+
+</header>
+
+<section id="データの要約" class="level1">
+<h1>データの要約</h1>
+<p>データが出たらまずはグラフの描画である。 ここではフローサイトメトリーを例に説明しよう。 例えばフローサイトメトリーと呼ばれる細胞1個あたりの蛍光強度を測定する方法がある。 ここでは細胞の膜タンパク質の量を蛍光抗体を用いて定量化すると仮定する。</p>
+<p>この仮想実験では、あるタンパク質Xを導入した細胞株、Xをknock down した細胞株、未処理の細胞株と比較した。</p>
+<p>まず測定時にx軸（FSC（前面散乱光））とy軸（SSC（側面散乱光））から測定したい細胞の範囲を決める。 このグラフのことを散布図もしくはpoint plotと呼ぶ。</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="データの要約_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>このサーモン色の範囲の細胞の膜タンパク質の量を測定すると、ヒストグラムと呼ばれる頻度を表すグラフを出力できる。 ヒストグラムとは、「ある特定のデータを区間ごとに区切り、各区間の個数や数値のばらつきを棒グラフに似た形の図で表現するグラフ」である。</p>
+<p>今回の仮想実験の結果から以下のようなヒストグラムを得ることが出来た。</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="データの要約_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>このグラフはx軸が蛍光強度、y軸が対数蛍光強度の頻度を表しており、各色は各細胞株を示している。この結果から、 (※実際の検出では<span class="math inline">\(1.0\times 10^6\)</span>以上で測定することはない）</p>
+<p>今回サンプルサイズ7で実験を行い、それぞれの各細胞株の蛍光強度を数値でまとめると以下のような結果が得られた。</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'group'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output-display">
+
+<div id="ognxpihhim" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#ognxpihhim .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ognxpihhim .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ognxpihhim .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ognxpihhim .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ognxpihhim .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ognxpihhim .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ognxpihhim .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ognxpihhim .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ognxpihhim .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ognxpihhim .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#ognxpihhim .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#ognxpihhim .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ognxpihhim .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ognxpihhim .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#ognxpihhim .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#ognxpihhim .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ognxpihhim .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#ognxpihhim .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ognxpihhim .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ognxpihhim .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ognxpihhim .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ognxpihhim .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ognxpihhim .gt_left {
+  text-align: left;
+}
+
+#ognxpihhim .gt_center {
+  text-align: center;
+}
+
+#ognxpihhim .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ognxpihhim .gt_font_normal {
+  font-weight: normal;
+}
+
+#ognxpihhim .gt_font_bold {
+  font-weight: bold;
+}
+
+#ognxpihhim .gt_font_italic {
+  font-style: italic;
+}
+
+#ognxpihhim .gt_super {
+  font-size: 65%;
+}
+
+#ognxpihhim .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+#ognxpihhim .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#ognxpihhim .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#ognxpihhim .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#ognxpihhim .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#ognxpihhim .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#ognxpihhim .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col">group</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">number</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">n</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">mean</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">geo_mean</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">median</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">sd</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">CV</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_center">WT</td>
+<td class="gt_row gt_right">1</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">28329674784</td>
+<td class="gt_row gt_right">55779295593</td>
+<td class="gt_row gt_right">33564033576</td>
+<td class="gt_row gt_right">30521179763</td>
+<td class="gt_row gt_right">0.7622031</td></tr>
+    <tr><td class="gt_row gt_center">WT</td>
+<td class="gt_row gt_right">2</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">52486809364</td>
+<td class="gt_row gt_right">55982238509</td>
+<td class="gt_row gt_right">33492355588</td>
+<td class="gt_row gt_right">29991622410</td>
+<td class="gt_row gt_right">0.7590031</td></tr>
+    <tr><td class="gt_row gt_center">WT</td>
+<td class="gt_row gt_right">3</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">127742674648</td>
+<td class="gt_row gt_right">16707980088</td>
+<td class="gt_row gt_right">34168057902</td>
+<td class="gt_row gt_right">30108906812</td>
+<td class="gt_row gt_right">0.7512940</td></tr>
+    <tr><td class="gt_row gt_center">WT</td>
+<td class="gt_row gt_right">4</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">66418858690</td>
+<td class="gt_row gt_right">30940875823</td>
+<td class="gt_row gt_right">33122379229</td>
+<td class="gt_row gt_right">29832169391</td>
+<td class="gt_row gt_right">0.7567649</td></tr>
+    <tr><td class="gt_row gt_center">WT</td>
+<td class="gt_row gt_right">5</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">109059747793</td>
+<td class="gt_row gt_right">17790195666</td>
+<td class="gt_row gt_right">33537262759</td>
+<td class="gt_row gt_right">30006193691</td>
+<td class="gt_row gt_right">0.7560520</td></tr>
+    <tr><td class="gt_row gt_center">WT</td>
+<td class="gt_row gt_right">6</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">116180391682</td>
+<td class="gt_row gt_right">27911614932</td>
+<td class="gt_row gt_right">33997660429</td>
+<td class="gt_row gt_right">29909648016</td>
+<td class="gt_row gt_right">0.7516337</td></tr>
+    <tr><td class="gt_row gt_center">WT</td>
+<td class="gt_row gt_right">7</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">97309511524</td>
+<td class="gt_row gt_right">27057635599</td>
+<td class="gt_row gt_right">33564278710</td>
+<td class="gt_row gt_right">30102924905</td>
+<td class="gt_row gt_right">0.7587496</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+</div>
+<div class="cell-output-display">
+
+<div id="yjqiygvfpe" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#yjqiygvfpe .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#yjqiygvfpe .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#yjqiygvfpe .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#yjqiygvfpe .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#yjqiygvfpe .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#yjqiygvfpe .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#yjqiygvfpe .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#yjqiygvfpe .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#yjqiygvfpe .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#yjqiygvfpe .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#yjqiygvfpe .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#yjqiygvfpe .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#yjqiygvfpe .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yjqiygvfpe .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#yjqiygvfpe .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#yjqiygvfpe .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yjqiygvfpe .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#yjqiygvfpe .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yjqiygvfpe .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#yjqiygvfpe .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yjqiygvfpe .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#yjqiygvfpe .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#yjqiygvfpe .gt_left {
+  text-align: left;
+}
+
+#yjqiygvfpe .gt_center {
+  text-align: center;
+}
+
+#yjqiygvfpe .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#yjqiygvfpe .gt_font_normal {
+  font-weight: normal;
+}
+
+#yjqiygvfpe .gt_font_bold {
+  font-weight: bold;
+}
+
+#yjqiygvfpe .gt_font_italic {
+  font-style: italic;
+}
+
+#yjqiygvfpe .gt_super {
+  font-size: 65%;
+}
+
+#yjqiygvfpe .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+#yjqiygvfpe .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#yjqiygvfpe .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#yjqiygvfpe .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#yjqiygvfpe .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#yjqiygvfpe .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#yjqiygvfpe .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col">group</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">number</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">n</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">mean</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">geo_mean</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">median</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">sd</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">CV</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_center">Over expression</td>
+<td class="gt_row gt_right">1</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">78369820</td>
+<td class="gt_row gt_right">23954189</td>
+<td class="gt_row gt_right">33614740</td>
+<td class="gt_row gt_right">29764802</td>
+<td class="gt_row gt_right">0.7521035</td></tr>
+    <tr><td class="gt_row gt_center">Over expression</td>
+<td class="gt_row gt_right">2</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">79419642</td>
+<td class="gt_row gt_right">13774402</td>
+<td class="gt_row gt_right">33692009</td>
+<td class="gt_row gt_right">30374785</td>
+<td class="gt_row gt_right">0.7590926</td></tr>
+    <tr><td class="gt_row gt_center">Over expression</td>
+<td class="gt_row gt_right">3</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">92191456</td>
+<td class="gt_row gt_right">17135548</td>
+<td class="gt_row gt_right">33882104</td>
+<td class="gt_row gt_right">30023131</td>
+<td class="gt_row gt_right">0.7531921</td></tr>
+    <tr><td class="gt_row gt_center">Over expression</td>
+<td class="gt_row gt_right">4</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">63841373</td>
+<td class="gt_row gt_right">5652677</td>
+<td class="gt_row gt_right">33692942</td>
+<td class="gt_row gt_right">30750710</td>
+<td class="gt_row gt_right">0.7660580</td></tr>
+    <tr><td class="gt_row gt_center">Over expression</td>
+<td class="gt_row gt_right">5</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">95102996</td>
+<td class="gt_row gt_right">1831900</td>
+<td class="gt_row gt_right">33488494</td>
+<td class="gt_row gt_right">30137661</td>
+<td class="gt_row gt_right">0.7594641</td></tr>
+    <tr><td class="gt_row gt_center">Over expression</td>
+<td class="gt_row gt_right">6</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">101738645</td>
+<td class="gt_row gt_right">12346203</td>
+<td class="gt_row gt_right">33004164</td>
+<td class="gt_row gt_right">30353743</td>
+<td class="gt_row gt_right">0.7666134</td></tr>
+    <tr><td class="gt_row gt_center">Over expression</td>
+<td class="gt_row gt_right">7</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">131752114</td>
+<td class="gt_row gt_right">35921107</td>
+<td class="gt_row gt_right">34269787</td>
+<td class="gt_row gt_right">30219476</td>
+<td class="gt_row gt_right">0.7510717</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+</div>
+<div class="cell-output-display">
+
+<div id="prhvhepkae" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#prhvhepkae .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#prhvhepkae .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#prhvhepkae .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#prhvhepkae .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#prhvhepkae .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#prhvhepkae .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#prhvhepkae .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#prhvhepkae .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#prhvhepkae .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#prhvhepkae .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#prhvhepkae .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#prhvhepkae .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#prhvhepkae .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#prhvhepkae .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#prhvhepkae .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#prhvhepkae .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#prhvhepkae .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#prhvhepkae .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#prhvhepkae .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#prhvhepkae .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#prhvhepkae .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#prhvhepkae .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#prhvhepkae .gt_left {
+  text-align: left;
+}
+
+#prhvhepkae .gt_center {
+  text-align: center;
+}
+
+#prhvhepkae .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#prhvhepkae .gt_font_normal {
+  font-weight: normal;
+}
+
+#prhvhepkae .gt_font_bold {
+  font-weight: bold;
+}
+
+#prhvhepkae .gt_font_italic {
+  font-style: italic;
+}
+
+#prhvhepkae .gt_super {
+  font-size: 65%;
+}
+
+#prhvhepkae .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+#prhvhepkae .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#prhvhepkae .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#prhvhepkae .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#prhvhepkae .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#prhvhepkae .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#prhvhepkae .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col">group</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">number</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">n</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">mean</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">geo_mean</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">median</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">sd</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col">CV</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_center">Knock down</td>
+<td class="gt_row gt_right">1</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">32801470945</td>
+<td class="gt_row gt_right">7239357450</td>
+<td class="gt_row gt_right">50653210126</td>
+<td class="gt_row gt_right">45105449074</td>
+<td class="gt_row gt_right">0.7566618</td></tr>
+    <tr><td class="gt_row gt_center">Knock down</td>
+<td class="gt_row gt_right">2</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">96493385729</td>
+<td class="gt_row gt_right">79136459298</td>
+<td class="gt_row gt_right">50030641957</td>
+<td class="gt_row gt_right">45837868199</td>
+<td class="gt_row gt_right">0.7640241</td></tr>
+    <tr><td class="gt_row gt_center">Knock down</td>
+<td class="gt_row gt_right">3</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">149142338276</td>
+<td class="gt_row gt_right">99209562874</td>
+<td class="gt_row gt_right">51077820032</td>
+<td class="gt_row gt_right">45319666382</td>
+<td class="gt_row gt_right">0.7552215</td></tr>
+    <tr><td class="gt_row gt_center">Knock down</td>
+<td class="gt_row gt_right">4</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">121108662298</td>
+<td class="gt_row gt_right">84242585734</td>
+<td class="gt_row gt_right">50896108939</td>
+<td class="gt_row gt_right">45733064366</td>
+<td class="gt_row gt_right">0.7593851</td></tr>
+    <tr><td class="gt_row gt_center">Knock down</td>
+<td class="gt_row gt_right">5</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">34487152113</td>
+<td class="gt_row gt_right">51879820526</td>
+<td class="gt_row gt_right">49938252695</td>
+<td class="gt_row gt_right">44650886896</td>
+<td class="gt_row gt_right">0.7554069</td></tr>
+    <tr><td class="gt_row gt_center">Knock down</td>
+<td class="gt_row gt_right">6</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">140041173114</td>
+<td class="gt_row gt_right">38789893106</td>
+<td class="gt_row gt_right">50078114968</td>
+<td class="gt_row gt_right">45066624225</td>
+<td class="gt_row gt_right">0.7583026</td></tr>
+    <tr><td class="gt_row gt_center">Knock down</td>
+<td class="gt_row gt_right">7</td>
+<td class="gt_row gt_right">15000</td>
+<td class="gt_row gt_right">118452056606</td>
+<td class="gt_row gt_right">21601624921</td>
+<td class="gt_row gt_right">49869226283</td>
+<td class="gt_row gt_right">45017904733</td>
+<td class="gt_row gt_right">0.7600034</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+</div>
+</div>
+<p>この図で表されるのはnumberが本実験におけるreplicate、つまりサンプルサイズ、meanが算術平均(arithmetic mean)、geo meanが幾何平均(geometric mean)、sdが標準偏差(standard deviation)、CVが変動係数（標準偏差を算術平均で割った値）である。</p>
+<p>幾何平均は、</p>
+<p><span class="math display">\[
+Geometric\space mean=\sqrt[n]{x_1\times x_2 \cdots x_n}\\
+=(\Pi x_i)^{1/n}\\
+=\exp(\frac{1}{n}\Sigma \ln( x_i))
+\]</span> である。 ここで対数正規分布について説明する。 対数正規分布は</p>
+<p><span class="math display">\[
+f(x)=\frac{1}{\sqrt{2\pi\sigma}x}\exp(\frac{\ln(x)-\mu}{2\sigma^2})
+\]</span></p>
+<p>で表される分布であり、 平均値が</p>
+<p><span class="math display">\[
+E(x) = \exp(µ +\frac{σ^2}{2})
+\]</span></p>
+<p>分散が</p>
+<p><span class="math display">\[
+V(x)=\exp(2µ + σ^2)(\exp(σ^2) − 1)
+\]</span></p>
+<p>中央値が</p>
+<p><span class="math display">\[
+Median=\exp(\mu)
+\]</span></p>
+<p>最頻値が</p>
+<p><span class="math display">\[
+Mode=\exp(\mu-\sigma^2)
+\]</span></p>
+<p>と表される。</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="データの要約_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>上記の数値ではわかりにくいので、WTで除したときの比率でグラフを描画してみる。 そうすると以下のようになる。</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="データの要約_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="データの要約_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>上のグラフを箱ひげ図（Box plot）、下のグラフを棒グラフ(Bar plot)と呼ぶ。このグラフだと箱ひげ図が見づらいので、WTを例に箱ひげ図について説明する。</p>
+<div class="cell">
+
+</div>
+<p>Box plotの上側のひげが最大値、Boxの上側が75 (%)パーセンタイル（第三四分位数）、中心の横線が50(%)パーセンタイル（Median）、Boxの下側が25 (%）パーセンタイル（第一四分位数）、下側のひげが最小値である。</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
